@@ -20,18 +20,20 @@ RUN cargo build --release --all-features
 FROM oven/bun:1 AS frontend-builder
 WORKDIR /fuiz/frontend
 
-COPY package.json bun.lock /fuiz/frontend/
-RUN bun install --production --frozen-lockfile
+RUN mkdir -p /temp/frontend
+COPY package.json bun.lock /temp/frontend/
+RUN cd /temp/frontend && \
+    bun install --frozen-lockfile
 
-# Final image
 FROM node:22-bookworm-slim
 
 WORKDIR /fuiz
 # Copy built binaries and website
 COPY --from=builder /fuiz/corkboard/target/release /fuiz/corkboard
 COPY --from=builder /fuiz/backend/target/release /fuiz/backend
-COPY --from=frontend-builder /fuiz/frontend/node_modules /fuiz/frontend/node_modules
-COPY /build /fuiz/frontend/build
+COPY --from=frontend-builder /temp/frontend/node_modules /fuiz/frontend/node_modules
+COPY build /fuiz/frontend/build
+COPY frontend/package-build.json /fuiz/frontend/package.json
 
 EXPOSE 5173 5040 8080 8787
 VOLUME ["/fuiz/data"]
