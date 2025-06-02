@@ -1,0 +1,17 @@
+services:
+  fuiz:
+    build:
+      context: .
+    container_name: fuiz
+    restart: unless-stopped
+    ports:
+      - 5173:5173
+      - 5040:5040
+      - 8080:8080
+      - 8787:8787
+    env_file:
+      - .env
+    volumes:
+      - ./quizzes:/fuiz/quizzes
+      - ./data:/fuiz/data
+      - ./dev.vars:/fuiz/website/.dev.vars

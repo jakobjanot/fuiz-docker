@@ -1,0 +1,9 @@
+[submodule "corkboard"]
+	path = corkboard
+	url = https://github.com/jakobjanot/fuiz-corkboard
+[submodule "backend"]
+	path = backend
+	url = https://github.com/jakobjanot/fuiz-backend
+[submodule "frontend"]
+	path = frontend
+	url = https://github.com/jakobjanot/fuiz-frontend
