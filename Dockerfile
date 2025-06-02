@@ -1,16 +1,15 @@
 # Use an official Rust image for building Rust projects
-FROM node:22-bookworm-slim AS builder
+FROM rust:1.87-bullseye AS builder
 
 WORKDIR /fuiz
-
-# Install git
-RUN apt-get update && \
-    apt-get install -y git curl build-essential && \
-    rm -rf /var/lib/apt/lists/*
 
 # Install rustup
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
+
+WORKDIR /fuiz
+COPY backend /fuiz/backend
+COPY corkboard /fuiz/corkboard
 
 WORKDIR /fuiz/backend
 RUN cargo build --release --all-features
@@ -18,22 +17,23 @@ RUN cargo build --release --all-features
 WORKDIR /fuiz/corkboard
 RUN cargo build --release --all-features
 
+FROM oven/bun:1 AS frontend-builder
+WORKDIR /fuiz/frontend
+
+COPY package.json bun.lock /fuiz/frontend/
+RUN bun install --production --frozen-lockfile
+
 # Final image
 FROM node:22-bookworm-slim
 
-WORKDIR /fuiz/frontend
-RUN npm install
-RUN npm install -g bun
-RUN bun run build
-
 WORKDIR /fuiz
-
 # Copy built binaries and website
 COPY --from=builder /fuiz/corkboard/target/release /fuiz/corkboard
-COPY --from=builder /fuiz/hosted-server/target/release /fuiz/fuiz-server
-COPY --from=builder /fuiz/website /etc/nginx/html
+COPY --from=builder /fuiz/backend/target/release /fuiz/backend
+COPY --from=frontend-builder /fuiz/frontend/node_modules /fuiz/frontend/node_modules
+COPY /build /fuiz/frontend/build
 
 EXPOSE 5173 5040 8080 8787
 VOLUME ["/fuiz/data"]
 
-CMD ["/fuiz/corkboard/corkboard", "&", "/fuiz/fuiz-server/fuiz-server", "&", "nginx", "-g", "daemon off;"]
+CMD ["/fuiz/corkboard/corkboard", "&", "/fuiz/backend/fuiz-server", "&", "node", "-r", "/fuiz/frontend/dotenv/config", "/fuiz/frontend/build"]

@@ -1,9 +1,9 @@
 [submodule "corkboard"]
 	path = corkboard
-	url = https://github.com/jakobjanot/fuiz-corkboard
+	url = https://gitlab.com/fuiz/corkboard.git
 [submodule "backend"]
 	path = backend
-	url = https://github.com/jakobjanot/fuiz-backend
+	url = https://gitlab.com/fuiz/hosted-server.git
 [submodule "frontend"]
 	path = frontend
 	url = https://github.com/jakobjanot/fuiz-frontend
