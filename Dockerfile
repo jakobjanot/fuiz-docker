@@ -1,11 +1,7 @@
 # Use an official Rust image for building Rust projects
-FROM rust:1.87-bullseye AS builder
+FROM rust:1.87-bullseye AS backends-builder
 
-WORKDIR /fuiz
-
-# Install rustup
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+ENV NETWORK_ORIGIN="http://localhost:3000"
 
 WORKDIR /fuiz
 COPY backend /fuiz/backend
@@ -16,26 +12,30 @@ RUN cargo build --release --all-features
 
 WORKDIR /fuiz/corkboard
 RUN cargo build --release --all-features
-
-FROM oven/bun:1 AS frontend-builder
-WORKDIR /fuiz/frontend
-
-RUN mkdir -p /temp/frontend
-COPY package.json bun.lock /temp/frontend/
-RUN cd /temp/frontend && \
-    bun install --frozen-lockfile
-
 FROM node:22-bookworm-slim
 
 WORKDIR /fuiz
 # Copy built binaries and website
-COPY --from=builder /fuiz/corkboard/target/release /fuiz/corkboard
-COPY --from=builder /fuiz/backend/target/release /fuiz/backend
-COPY --from=frontend-builder /temp/frontend/node_modules /fuiz/frontend/node_modules
-COPY build /fuiz/frontend/build
-COPY frontend/package-build.json /fuiz/frontend/package.json
+COPY --from=backends-builder /fuiz/corkboard/target/release /fuiz/corkboard
+COPY --from=backends-builder /fuiz/backend/target/release /fuiz/backend
 
-EXPOSE 5173 5040 8080 8787
+WORKDIR /fuiz/frontend
+
+COPY frontend .
+
+RUN npm install -g bun@latest wrangler@latest
+RUN bun install --frozen-lockfile
+
+RUN bun run build
+
+# Copy built app files
+#COPY frontend/build ./build
+
+EXPOSE 3000 5040 8080
 VOLUME ["/fuiz/data"]
 
-CMD ["/fuiz/corkboard/corkboard", "&", "/fuiz/backend/fuiz-server", "&", "node", "-r", "/fuiz/frontend/dotenv/config", "/fuiz/frontend/build"]
+WORKDIR /fuiz
+
+COPY "entrypoint.sh" /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT [ "/usr/local/bin/entrypoint.sh" ]
