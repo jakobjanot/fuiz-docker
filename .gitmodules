@@ -6,4 +6,4 @@
 	url = https://gitlab.com/fuiz/hosted-server.git
 [submodule "frontend"]
 	path = frontend
-	url = https://github.com/jakobjanot/fuiz-frontend
+	url = https://gitlab.com/fuiz/website.git

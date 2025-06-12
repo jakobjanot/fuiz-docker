@@ -1,14 +1,38 @@
 services:
-  fuiz:
+  backend:
     build:
       context: .
-    container_name: fuiz
-    restart: unless-stopped
+      dockerfile: docker/Dockerfile.backend
+    environment:
+      - NETWORK_ORIGIN=http://frontend:3000
     ports:
-      - 3000:3000
-      - 5040:5040
-      - 8080:8080
+      - "5040:5040"
     volumes:
-      - ./quizzes:/fuiz/quizzes
-      - ./data:/fuiz/data
-     
+      - backend-data:/app/data
+
+  corkboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.corkboard
+    environment:
+      - NETWORK_ORIGIN=http://frontend:3000
+    ports:
+      - "8080:8080"
+    volumes:
+      - corkboard-data:/app/data
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    environment:
+      - PUBLIC_BACKEND_URL=http://backend:5040
+      - PUBLIC_WS_URL=http://backend:5040/ws
+      - PUBLIC_CORKBOARD_URL=http://corkboard:8080
+      - NODE_ENV=production
+    ports:
+      - "3000:3000"
+
+volumes:
+  backend-data:
+  corkboard-data:
