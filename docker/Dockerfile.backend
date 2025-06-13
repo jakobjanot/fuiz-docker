@@ -6,5 +6,5 @@ RUN cargo build --release --all-features
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/target/release/fuiz-server .
-EXPOSE 5040
+EXPOSE 8080
 CMD ["./fuiz-server"]

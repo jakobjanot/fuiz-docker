@@ -6,5 +6,5 @@ RUN cargo build --release --all-features
 FROM debian:bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/target/release/corkboard .
-EXPOSE 8080
+EXPOSE 5040
 CMD ["./corkboard"]
