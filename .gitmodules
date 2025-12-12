@@ -1,0 +1,9 @@
+[submodule "upstream/fuiz-backend"]
+	path = upstream/fuiz-backend
+	url = https://gitlab.com/fuiz/hosted-server.git
+[submodule "upstream/fuiz-corkboard"]
+	path = upstream/fuiz-corkboard
+	url = https://gitlab.com/fuiz/corkboard.git
+[submodule "upstream/fuiz-frontend"]
+	path = upstream/fuiz-frontend
+	url = https://github.com/jakobjanot/fuiz-frontend.git
