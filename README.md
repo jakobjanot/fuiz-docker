@@ -46,6 +46,14 @@ Services:
 - Game backend: http://localhost:8787 (container listens on 8080)
 - Media server: http://localhost:43907 (container listens on 5040)
 
+## Docker images (multi-arch)
+
+The GitHub release workflow builds and pushes GHCR images for:
+- `linux/amd64`
+- `linux/arm64` (Apple Silicon)
+
+Workflow: `.github/workflows/release-images.yml`.
+
 ## Website configuration you must set (wherever it’s hosted)
 The `website` expects these build-time public env vars:
 - `PUBLIC_BACKEND_URL` (e.g. `https://api.yourdomain.com`)
